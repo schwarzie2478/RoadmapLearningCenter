@@ -1,172 +1,493 @@
-<!-- Minimal CSS overrides for the learning environment -->
+/* ========================================
+   BMW-Inspired Design System
+   See DESIGN.md for rationale.
+   ======================================== */
 
-/* Layout */
+/* ---- Design Tokens ---- */
+:root {
+  /* Colors */
+  --bmw-white: #ffffff;
+  --bmw-blue: #1c69d4;
+  --bmw-focus-blue: #0653b6;
+  --bmw-near-black: #262626;
+  --bmw-meta-gray: #757575;
+  --bmw-silver: #bbbbbb;
+  --bmw-dark-bg: #171717;
+
+  /* Typography */
+  --bmw-font-display: "Helvetica Neue", Helvetica, Arial,
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  --bmw-font-body: "Helvetica Neue", Helvetica, Arial,
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  --bmw-font-mono: "Cascadia Code", "Fira Code", monospace;
+
+  /* Spacing (8px base) */
+  --sp-xs: 4px;
+  --sp-sm: 8px;
+  --sp-md: 16px;
+  --sp-lg: 24px;
+  --sp-xl: 32px;
+  --sp-2xl: 48px;
+  --sp-3xl: 64px;
+
+  /* Zero border-radius everywhere */
+  --bmw-radius: 0px;
+}
+
+/* ---- Typography Base ---- */
+html {
+  font-family: var(--bmw-font-body);
+  font-size: 16px;
+  line-height: 1.15;
+  color: var(--bmw-near-black);
+  background: var(--bmw-white);
+}
+
+body {
+  margin: 0;
+  font-family: var(--bmw-font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 0.5rem 0;
+  font-family: var(--bmw-font-display);
+  line-height: 1.30;
+}
+
+h1 {
+  font-size: 3.75rem;
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+h2 { font-size: 2rem; font-weight: 300; text-transform: uppercase; }
+h3 { font-size: 1.5rem; font-weight: 300; text-transform: uppercase; }
+h4 { font-size: 1.25rem; font-weight: 300; text-transform: uppercase; }
+
+.nav-heading {
+  font-size: 1.13rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+p {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+a {
+  color: var(--bmw-blue);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+a:hover { color: var(--bmw-focus-blue); }
+
+/* ---- Layout ---- */
 .sidebar {
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    width: 220px;
-    background-color: #0a192f;
-    padding: 1rem;
-    z-index: 1000;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 220px;
+  background-color: var(--bmw-dark-bg);
+  padding: var(--sp-lg);
+  border-right: 1px solid #2a2a2a;
+  z-index: 1000;
 }
 
 .sidebar-brand {
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: #64ffda;
-    padding: 0.5rem 0 1rem;
+  font-family: var(--bmw-font-body);
+  font-size: 1.13rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bmw-white);
+  padding-bottom: var(--sp-md);
+  margin-bottom: var(--sp-md);
+  border-bottom: 3px solid var(--bmw-blue);
+}
+
+.sidebar .nav-item {
+  list-style: none;
 }
 
 .sidebar .nav-link {
-    color: #8892b0;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+  display: block;
+  color: var(--bmw-silver);
+  padding: var(--sp-sm) var(--sp-md);
+  border-radius: var(--bmw-radius);
+  font-size: 1rem;
+  font-weight: 400;
+  transition: color 0.1s ease, background-color 0.1s ease;
 }
 
 .sidebar .nav-link:hover,
 .sidebar .nav-link.active {
-    color: #64ffda;
-    background-color: rgba(100, 255, 218, 0.1);
+  color: var(--bmw-white);
+  background-color: rgba(28, 105, 212, 0.2);
+  border-left: 3px solid var(--bmw-blue);
+  padding-left: calc(var(--sp-md) - 3px);
 }
 
 .main-content {
-    margin-left: 220px;
-    padding: 1rem 2rem;
+  margin-left: 220px;
+  min-height: 100vh;
 }
 
-/* Topic Cards */
-.topic-card {
-    border-left: 4px solid #0a192f;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.topic-card:hover {
-    border-color: #64ffda;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* Block Content */
-.block-content pre {
-    background-color: #1e1e1e;
-    color: #d4d4d4;
-    padding: 1rem;
-    border-radius: 4px;
-    font-family: 'Cascadia Code', 'Fira Code', monospace;
-    font-size: 0.85rem;
-    overflow-x: auto;
-}
-
-/* Thread Items */
-.thread-item {
-    background-color: #f8f9fa;
-    border-radius: 4px;
-    line-height: 1.5;
-}
-
-/* Playground */
-.playground-output pre {
-    background-color: #1e1e1e;
-    color: #d4d4d4;
-    padding: 1rem;
-    border-radius: 4px;
-    font-family: 'Cascadia Code', 'Fira Code', monospace;
-    font-size: 0.85rem;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-/* Badges */
-.confidence-badge {
-    background-color: #e9ecef;
-    color: #495057;
-    font-size: 0.8rem;
-}
-
-.state-badge {
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 12px;
-}
-
-/* Hero Section */
+/* ---- Hero Sections ---- */
 .hero-section {
-    background: linear-gradient(135deg, #0a192f 0%, #172a45 100%);
-    color: white;
-    padding: 2rem;
-    border-radius: 8px;
+  background: linear-gradient(135deg, var(--bmw-dark-bg) 0%, #2a2a2a 100%);
+  color: var(--bmw-white);
+  padding: var(--sp-3xl) var(--sp-2xl);
 }
 
 .hero-section h1 {
-    color: white;
+  color: var(--bmw-white);
+  font-weight: 300;
+  text-transform: uppercase;
+  line-height: 1.30;
 }
 
 .hero-section .lead {
-    color: #8892b0;
+  color: var(--bmw-meta-gray);
+  font-size: 1rem;
+  line-height: 1.15;
 }
 
-/* Track title */
-.track-title {
-    color: #0a192f;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid #64ffda;
-    padding-bottom: 0.5rem;
+/* ---- Buttons ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--bmw-radius);
+  font-family: var(--bmw-font-body);
+  font-size: 1rem;
+  line-height: 1.2;
+  padding: 0.6rem 1.25rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
-/* Difficulty Badges */
-.difficulty-beginner .badge { background-color: #d4edda; color: #155724; }
-.difficulty-intermediate .badge { background-color: #fff3cd; color: #856404; }
-.difficulty-advanced .badge { background-color: #f8d7da; color: #721c24; }
+.btn-primary {
+  background-color: var(--bmw-blue);
+  color: var(--bmw-white);
+  border-color: var(--bmw-blue);
+  font-weight: 700;
+}
+.btn-primary:hover {
+  background-color: var(--bmw-focus-blue);
+  border-color: var(--bmw-focus-blue);
+  color: var(--bmw-white);
+}
 
-./* Markdown rendering */
-.markdown-content h1,.markdown-content h2,.markdown-content h3,
-.markdown-content h4,.markdown-content h5,.markdown-content h6 {
-    margin-top: 1.25rem;
-    margin-bottom: 0.75rem;
-    font-weight: 600;
+.btn-outline-primary {
+  background-color: transparent;
+  color: var(--bmw-blue);
+  border-color: var(--bmw-blue);
+  font-weight: 700;
+}
+.btn-outline-primary:hover {
+  background-color: var(--bmw-blue);
+  color: var(--bmw-white);
+}
+
+/* Dark surface buttons */
+.hero-section .btn-outline-secondary {
+  color: var(--bmw-white);
+  border: 1px solid var(--bmw-silver);
+  font-weight: 400;
+}
+.hero-section .btn-outline-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: var(--bmw-white);
+}
+
+.btn-success {
+  background-color: #1b5e20;
+  color: var(--bmw-white);
+  border-color: #1b5e20;
+  font-weight: 700;
+}
+.btn-success:hover { background-color: #2e7d32; color: var(--bmw-white); }
+
+.btn-outline-success {
+  background-color: transparent;
+  color: #1b5e20;
+  border-color: #1b5e20;
+  font-weight: 700;
+}
+.btn-outline-success:hover { background-color: #1b5e20; color: var(--bmw-white); }
+
+.btn-warning {
+  background-color: #e6a817;
+  color: var(--bmw-near-black);
+  border-color: #e6a817;
+  font-weight: 700;
+}
+.btn-warning:hover { background-color: #d49b14; }
+
+.btn-outline-warning {
+  background-color: transparent;
+  color: #b88a12;
+  border-color: #b88a12;
+  font-weight: 700;
+}
+.btn-outline-warning:hover { background-color: #e6a817; color: var(--bmw-near-black); }
+
+.btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+}
+
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.13rem;
+}
+
+/* ---- Cards ---- */
+.card {
+  border-radius: var(--bmw-radius);
+  border: 1px solid #e0e0e0;
+  background: var(--bmw-white);
+  box-shadow: none;
+}
+
+.card:hover {
+  border-color: var(--bmw-blue);
+}
+
+.card-body {
+  padding: var(--sp-lg);
+}
+
+/* ---- Badges ---- */
+.badge {
+  border-radius: var(--bmw-radius);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
+.bg-primary    { background-color: var(--bmw-blue) !important; }
+.bg-secondary  { background-color: var(--bmw-meta-gray) !important; color: var(--bmw-white) !important; }
+.bg-info       { background-color: #4a90d9 !important; color: var(--bmw-white) !important; }
+.bg-warning    { background-color: #e6a817 !important; color: var(--bmw-near-black) !important; }
+.bg-success    { background-color: #1b5e20 !important; }
+.bg-danger     { background-color: #c62828 !important; }
+
+.text-primary  { color: var(--bmw-blue) !important; }
+.text-success  { color: #1b5e20 !important; }
+.text-warning  { color: #b88a12 !important; }
+.text-danger   { color: #c62828 !important; }
+.text-muted    { color: var(--bmw-meta-gray) !important; }
+
+.state-badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--bmw-radius);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.confidence-badge {
+  background-color: var(--bmw-meta-gray);
+  color: var(--bmw-white);
+  font-size: 0.8rem;
+  border-radius: var(--bmw-radius);
+  padding: 0.25rem 0.5rem;
+}
+
+/* ---- Progress Bar ---- */
+.progress {
+  border-radius: var(--bmw-radius);
+  background-color: #e0e0e0;
+  overflow: hidden;
+}
+.progress-bar {
+  border-radius: var(--bmw-radius);
+}
+.progress-bar.bg-danger   { background-color: #c62828 !important; }
+.progress-bar.bg-warning   { background-color: #e6a817 !important; }
+.progress-bar.bg-success   { background-color: #1b5e20 !important; }
+
+/* ---- Tables ---- */
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.table thead th {
+  background: var(--bmw-dark-bg);
+  color: var(--bmw-white);
+  padding: var(--sp-md);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  border-bottom: 3px solid var(--bmw-blue);
+}
+.table tbody td {
+  padding: var(--sp-md);
+  border-bottom: 1px solid #e0e0e0;
+}
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: #f8f8f8;
+}
+
+/* ---- Topic Cards ---- */
+.topic-card {
+  border-left: 4px solid var(--bmw-dark-bg);
+  transition: border-color 0.15s ease;
+  background: var(--bmw-white);
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid var(--bmw-dark-bg);
+}
+.topic-card:hover {
+  border-left-color: var(--bmw-blue);
+  box-shadow: none;
+}
+
+/* ---- Code / Playground / Blocks ---- */
+.block-content pre,
+.playground-output pre {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  padding: var(--sp-md);
+  border-radius: var(--bmw-radius);
+  font-family: var(--bmw-font-mono);
+  font-size: 0.85rem;
+  overflow-x: auto;
+}
+.playground-output pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.thread-item {
+  background-color: #f5f5f5;
+  border-radius: var(--bmw-radius);
+  line-height: 1.15;
+  padding: var(--sp-md);
+}
+
+/* ---- Block Type Colors ---- */
+.block-intro      { border-left: 4px solid #6f42c1; }
+.block-explanation { border-left: 4px solid var(--bmw-blue); }
+.block-example    { border-left: 4px solid #1b5e20; }
+.block-exercise   { border-left: 4px solid #e6a817; }
+.block-quiz       { border-left: 4px solid #c62828; }
+
+/* ---- Difficulty Badges ---- */
+.difficulty-beginner .badge       { background-color: #e8f5e9; color: #155724; }
+.difficulty-intermediate .badge   { background-color: #fff8e1; color: #856404; }
+.difficulty-advanced .badge       { background-color: #ffebee; color: #721c24; }
+
+/* ---- Markdown Content ---- */
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  font-weight: 300;
+  text-transform: uppercase;
+  line-height: 1.30;
 }
 .markdown-content h1 { font-size: 1.75rem; }
 .markdown-content h2 { font-size: 1.5rem; }
 .markdown-content h3 { font-size: 1.25rem; }
-.markdown-content p { margin-bottom: 0.75rem; line-height: 1.6; }
-.markdown-content ul,.markdown-content ol { margin-bottom: 0.75rem; padding-left: 1.5rem; }
+
+.markdown-content p {
+  margin-bottom: 0.75rem;
+  line-height: 1.15;
+}
+.markdown-content ul,.markdown-content ol {
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+}
 .markdown-content li { margin-bottom: 0.25rem; }
-.markdown-content pre { background-color: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 0.75rem 0; }
-.markdown-content code { background-color: #e9ecef; padding: 0.15rem 0.35rem; border-radius: 3px; font-size: 0.875rem; font-family: 'Cascadia Code', 'Fira Code', monospace; }
-.markdown-content pre code { background-color: transparent; padding: 0; }
-.markdown-content strong { font-weight: 600; }
-.markdown-content blockquote { border-left: 3px solid #0d6efd; padding-left: 1rem; color: #6c757d; margin: 0.75rem 0; }
 
-
-/* Block type colors */
-.block-intro {
-    border-left: 4px solid #6f42c1;
+.markdown-content pre {
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+  padding: var(--sp-md);
+  border-radius: var(--bmw-radius);
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+.markdown-content code {
+  background-color: #f0f0f0;
+  padding: 0.15rem 0.35rem;
+  border-radius: var(--bmw-radius);
+  font-size: 0.875rem;
+  font-family: var(--bmw-font-mono);
+}
+.markdown-content pre code {
+  background-color: transparent;
+  padding: 0;
+}
+.markdown-content strong { font-weight: 700; }
+.markdown-content blockquote {
+  border-left: 3px solid var(--bmw-blue);
+  padding-left: var(--sp-md);
+  color: var(--bmw-meta-gray);
+  margin: 0.75rem 0;
 }
 
-.block-explanation {
-    border-left: 4px solid #0d6efd;
+/* ---- Track Title ---- */
+.track-title {
+  color: var(--bmw-near-black);
+  font-weight: 900;
+  margin-bottom: var(--sp-md);
+  border-bottom: 3px solid var(--bmw-blue);
+  padding-bottom: var(--sp-sm);
+  font-size: 1.13rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.block-example {
-    border-left: 4px solid #198754;
+/* ---- Alerts ---- */
+.alert {
+  border-radius: var(--bmw-radius);
+  border: 1px solid transparent;
+  padding: var(--sp-md) var(--sp-lg);
+}
+.alert-success { background-color: #e8f5e9; color: #155724; border-color: #2e7d32; }
+.alert-danger  { background-color: #ffebee; color: #721c24; border-color: #c62828; }
+
+/* ---- Inputs ---- */
+.form-range::-webkit-slider-thumb {
+  background: var(--bmw-blue);
+  border-radius: var(--bmw-radius);
+}
+.form-range::-webkit-slider-runnable-track {
+  background: #e0e0e0;
+  border-radius: var(--bmw-radius);
 }
 
-.block-exercise {
-    border-left: 4px solid #fd7e14;
-}
+/* ---- Spinner Override ---- */
+.text-primary { color: var(--bmw-blue) !important; }
 
-.block-quiz {
-    border-left: 4px solid #dc3545;
-}
-
-/* Responsive */
+/* ---- Responsive ---- */
 @media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-    }
-    .main-content {
-        margin-left: 0;
-    }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .main-content {
+    margin-left: 0;
+  }
+  h1 { font-size: 2.5rem; }
+  h2 { font-size: 1.5rem; }
 }
