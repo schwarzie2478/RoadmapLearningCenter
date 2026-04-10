@@ -1,18 +1,20 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-// PostgreSQL database
 var db = builder
     .AddPostgres("postgres")
     .WithDataVolume("learning-db-data")
     .AddDatabase("learning");
 
-// Backend API
+var openRouterKey = builder.AddParameter("openrouter-api-key", secret: true);
+var openAiKey = builder.AddParameter("openai-api-key", secret: true);
+
 var server = builder
     .AddProject<Projects.Learning_Server>("server")
     .WithReference(db)
-    .WaitFor(db);
+    .WaitFor(db)
+    .WithEnvironment("OPENROUTER_API_KEY", openRouterKey)
+    .WithEnvironment("OPENAI_API_KEY", openAiKey);
 
-// Blazor WASM frontend
 builder.AddProject<Projects.Learning_Client>("client")
     .WithReference(server)
     .WaitFor(server);

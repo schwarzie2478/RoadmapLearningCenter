@@ -20,3 +20,4 @@ msbuild.binlog
 ## OS
 Thumbs.db
 .DS_Store
+server.log

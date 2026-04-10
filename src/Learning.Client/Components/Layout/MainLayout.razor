@@ -23,5 +23,19 @@
 </nav>
 
 <main class="main-content">
-    @Body
+    <ErrorBoundary>
+        <ChildContent>
+            @Body
+        </ChildContent>
+        <ErrorContent>
+            <div class="alert alert-danger mx-3 mt-3">
+                <h5>Something went wrong</h5>
+                <pre class="mt-2">@context.Message</pre>
+                <details>
+                    <summary>Full stack trace</summary>
+                    <pre style="white-space:pre-wrap;font-size:0.85rem">@context.StackTrace</pre>
+                </details>
+            </div>
+        </ErrorContent>
+    </ErrorBoundary>
 </main>
