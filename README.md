@@ -20,28 +20,46 @@ The learning map comes first. You pick a topic, click blocks only when ready, an
 |---|---|
 | Frontend | Blazor WebAssembly |
 | Backend | ASP.NET Core Web API |
-| Database | PostgreSQL (Docker, with pgvector ready) |
+| Database | PostgreSQL (Docker via Aspire, with pgvector ready) |
 | AI | OpenRouter / OpenAI (configurable via `LLM:` keys) |
 | Code Execution | Temporary isolated .NET console projects with security scanning |
+| Orchestration | .NET Aspire (Dashboard at http://localhost:15888) |
 
 ## Quick Start
 
-Three scripts handle startup. Run in separate terminals, in order:
+A single command starts everything (PostgreSQL, Server, Client, Aspire Dashboard):
 
 ```powershell
-cd scripts
-
-# 1. PostgreSQL in Docker (tensorchord/pgvecto-rs:pg14)
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\Start-Database.ps1
-
-# 2. Backend on http://localhost:5200 (Swagger at /swagger)
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\Start-Backend.ps1
-
-# 3. Frontend on http://localhost:5035
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\Start-Frontend.ps1
+# Starts all components; Dashboard opens automatically at http://localhost:15888
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass; .\scripts\Start-All.ps1
 ```
 
-Then browse to **http://localhost:5035**.
+Or run the AppHost directly:
+
+```powershell
+dotnet run --project src/Learning.AppHost
+```
+
+Then browse to the Client at the URL shown in the Aspire Dashboard, or the Dashboard itself at **http://localhost:15888**.
+
+> **Standalone mode** (without Aspire) — run each script in a separate terminal:
+>
+> ```powershell
+> .\scripts\Start-Database.ps1   # PostgreSQL in Docker
+> .\scripts\Start-Backend.ps1    # Backend on http://localhost:5200
+> .\scripts\Start-Frontend.ps1   # Frontend on http://localhost:5035
+> ```
+
+## Aspire Dashboard
+
+The .NET Aspire Dashboard gives you a live view of all running components:
+
+- **Service health** — real-time status of Server, Client, and PostgreSQL
+- **Logs** — aggregated, structured logs from every component in one place
+- **Traces** — OpenTelemetry distributed traces from browser → API → database
+- **Metrics** — request rates, latencies, and resource usage per service
+
+No separate setup needed — the dashboard launches automatically with `Start-All.ps1` and sends telemetry from any service that references `Learning.ServiceDefaults`.
 
 ## Initial Curriculum
 
@@ -57,15 +75,31 @@ Each topic ships with 1–3 learning blocks and seed prompts for AI-generated ex
 
 ## Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- PostgreSQL image (`tensorchord/pgvecto-rs:pg14-v0.2.0` or any `postgres:14+`)
+- [.NET Aspire workload](https://learn.microsoft.com/dotnet/aspire/) (`dotnet workload install aspire`)
 
 Optional for AI features — set one of:
 - `LLM__OpenRouter__ApiKey` environment variable
 - `LLM__OpenAI__ApiKey` environment variable
 
 Without a key, the roadmap, progress tracking, and code playground still work. AI-generated explanations and Q&A will fail at runtime.
+
+## Project Structure
+
+```
+src/
+  Learning.AppHost/      — Aspire orchestrator (entry point)
+  Learning.ServiceDefaults/  — shared OpenTelemetry, health checks, resilience
+  Learning.Server/       — ASP.NET Core API
+  Learning.Client/       — Blazor WebAssembly frontend
+  Learning.Shared/       — shared types and models
+scripts/
+  Start-All.ps1          — starts everything via Aspire
+  Start-Database.ps1     — PostgreSQL only (standalone)
+  Start-Backend.ps1      — Server only (standalone)
+  Start-Frontend.ps1     — Client only (standalone)
+```
 
 ## Data Model
 
