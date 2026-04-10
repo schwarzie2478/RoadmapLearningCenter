@@ -63,6 +63,19 @@ Response rules:
 - Include one well-commented code example.
 - If Exercise or Quiz, pose a challenge rather than giving the full answer.
 - Start with a brief overview.
+
+Formatting guidelines:
+- Use ## or ### for section headers.
+- Add a blank line between sections and between every bullet point.
+- Break dense explanations into short paragraphs (2-3 sentences max).
+- Always use bullet points for lists — never inline comma-separated lists.
+- Highlight key terms and API names in **bold** on first mention.
+- Format code blocks with ```csharp and proper indentation.
+- Add brief comments inside code that explain intent, not syntax.
+- End with a "### Key Takeaway" section of one or two sentences.
+- Never produce walls of text — if a paragraph exceeds ~80 words, split it.
+
+Tone: Educational, clear, and slightly conversational. Assume the reader is learning, not skimming documentation.
 """;
 
         var messages = new[]
@@ -106,6 +119,15 @@ Explanation context: {request.Context}
 {sbContext}
 
 Response rules: Keep under 300 words. Use C# 12+ syntax. Include one focused example. End with one reflection question.
+
+Formatting guidelines:
+- Use ### for any section headers.
+- Break dense text into short paragraphs (2-3 sentences max).
+- Always use bullet points for lists.
+- Highlight key terms in **bold** on first mention.
+- Format code blocks with ```csharp and proper indentation.
+
+Tone: Educational, clear, and slightly conversational. Assume the reader is learning, not skimming documentation.
 """;
 
         var messages = new List<ChatMsg>
@@ -145,19 +167,30 @@ Response rules: Keep under 300 words. Use C# 12+ syntax. Include one focused exa
             var json = JsonSerializer.Serialize(reqBody);
             using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
+            using var request = new HttpRequestMessage(HttpMethod.Post, baseUrl + "/chat/completions")
+            {
+                Content = content
+            };
+
             if (_provider == "openrouter")
             {
-                content.Headers.Add("Authorization", $"Bearer {GetOpenRouterKey()}");
-                content.Headers.Add("HTTP-Referer", "https://localhost");
-                content.Headers.Add("X-Title", "OhMyPi Learning");
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", GetOpenRouterKey());
+                request.Headers.Add("HTTP-Referer", "https://localhost");
+                request.Headers.Add("X-Title", "OhMyPi Learning");
             }
             else
             {
-                content.Headers.Add("Authorization", $"Bearer {GetOpenAIKey()}");
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", GetOpenAIKey());
             }
 
-            using var response = await _http.PostAsync(baseUrl + "/chat/completions", content, ct);
-            response.EnsureSuccessStatusCode();
+            using var response = await _http.SendAsync(request, ct);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync(ct);
+                _logger.LogError("LLM call failed with {StatusCode}: {ErrorBody}", response.StatusCode, errorBody);
+                throw new HttpRequestException($"LLM call failed with {response.StatusCode}: {errorBody}");
+            }
             var resultJson = await response.Content.ReadAsStringAsync(ct);
             var result = JsonSerializer.Deserialize<ChatResp>(resultJson, JsonOpts);
             return result?.Choices?[0]?.Message?.Content?.Trim()
@@ -199,15 +232,23 @@ Response rules: Keep under 300 words. Use C# 12+ syntax. Include one focused exa
         });
     }
 
-    private string GetOpenRouterKey() =>
-        GetConfigValue("LLM:OpenRouter:ApiKey")
-        ?? Environment.GetEnvironmentVariable("OPENROUTER_API_KEY")
-        ?? throw new InvalidOperationException("OpenRouter API key not configured. Set LLM__OpenRouter__ApiKey or OPENROUTER_API_KEY.");
+    private string GetOpenRouterKey()
+    {
+        var key = GetConfigValue("LLM:OpenRouter:ApiKey")
+            ?? Environment.GetEnvironmentVariable("OPENROUTER_API_KEY");
+        if (string.IsNullOrWhiteSpace(key))
+            throw new InvalidOperationException("OpenRouter API key not configured. Set LLM__OpenRouter__ApiKey or OPENROUTER_API_KEY.");
+        return key;
+    }
 
-    private string GetOpenAIKey() =>
-        GetConfigValue("LLM:OpenAI:ApiKey")
-        ?? Environment.GetEnvironmentVariable("OPENAI_API_KEY")
-        ?? throw new InvalidOperationException("OpenAI API key not configured.");
+    private string GetOpenAIKey()
+    {
+        var key = GetConfigValue("LLM:OpenAI:ApiKey")
+            ?? Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+        if (string.IsNullOrWhiteSpace(key))
+            throw new InvalidOperationException("OpenAI API key not configured.");
+        return key;
+    }
 
     private string? GetConfigValue(string key) => _config[key];
     private int GetConfigValueAsInt(string key, int fallback) => int.TryParse(_config[key], out var v) ? v : fallback;
