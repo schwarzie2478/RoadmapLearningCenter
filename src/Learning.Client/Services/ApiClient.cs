@@ -27,6 +27,12 @@ public class ApiClient(HttpClient http)
             ?? throw new InvalidOperationException($"Block {blockId} not found.");
     }
 
+    public async Task DeleteBlockContentAsync(Guid topicId, Guid blockId)
+    {
+        var response = await http.DeleteAsync($"api/topic/{topicId}/blocks/{blockId}/content");
+        response.EnsureSuccessStatusCode();
+    }
+
     public async Task<ParagraphDto> AskQuestionAsync(AIAskRequest request)
     {
         var response = await http.PostAsJsonAsync("api/ai/ask", request, JsonOptions);

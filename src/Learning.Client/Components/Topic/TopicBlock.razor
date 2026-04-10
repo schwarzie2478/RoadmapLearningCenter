@@ -1,9 +1,12 @@
+@using Markdig
 @using Learning.Client.Components.Topic
 @inject ApiClient _api
 @inject StateService _state
 
 <div class="card block-@Header.Type.ToString().ToLowerInvariant() mb-2">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex justify-content-between align-items-center"
+         style="cursor: pointer"
+         @onclick="ToggleHeader">
         <div>
             <span class="badge bg-secondary me-2">@Header.Type</span>
             <strong>@Header.Title</strong>
@@ -11,15 +14,29 @@
         <div>
             @if (_contentLoaded)
             {
-                <button class="btn btn-sm btn-outline-secondary"
-                        @onclick="() => SetExpanded(false)">Collapse</button>
+                <button class="btn btn-sm btn-outline-danger"
+                        @onclick="ResetContentAsync"
+                        @onclick:stopPropagation
+                        disabled="@_loading">
+                    Reset
+                </button>
             }
-            else
+            @if (!Header.HasContent && !_contentLoaded)
             {
                 <button class="btn btn-sm btn-primary"
                         @onclick="LoadContent"
+                        @onclick:stopPropagation
                         disabled="@_loading">
                     @(_loading ? "Loading..." : "Explore")
+                </button>
+            }
+            else if (!_contentLoaded)
+            {
+                <button class="btn btn-sm btn-outline-success"
+                        @onclick="LoadContent"
+                        @onclick:stopPropagation
+                        disabled="@_loading">
+                    @(_loading ? "Loading..." : "View")
                 </button>
             }
         </div>
@@ -27,9 +44,14 @@
     @if (_expanded && _content != null)
     {
         <div class="card-body">
-            <div class="block-content">
-                @((MarkupString)_content.Content)
-            </div>
+                @if (string.IsNullOrEmpty(_renderedHtml))
+                {
+                    <p class="text-muted">No content generated.</p>
+                }
+                else
+                {
+                    <div class="markdown-content">@((MarkupString)_renderedHtml)</div>
+                }
 
             @if (_content.Paragraphs?.Count > 0)
             {
@@ -51,11 +73,40 @@
     private bool _loading;
     private bool _contentLoaded;
     private TopicBlockDto? _content;
+    private string? _renderedHtml;
 
     public void SetExpanded(bool value)
     {
         _expanded = value;
+        if (!value) _contentLoaded = false;
         if (value) _state.ToggleBlock(BlockId);
+    }
+
+    private void ToggleHeader()
+    {
+        if (_loading) return;
+        SetExpanded(!_expanded);
+    }
+
+    private async Task ResetContentAsync()
+    {
+        _loading = true;
+        try
+        {
+            await _api.DeleteBlockContentAsync(TopicId, BlockId);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to delete block content: {ex.Message}");
+        }
+        finally
+        {
+            _contentLoaded = false;
+            _expanded = false;
+            _content = null;
+            _renderedHtml = null;
+            _loading = false;
+        }
     }
 
     private async Task LoadContent()
@@ -66,6 +117,9 @@
             _content = await _api.GetBlockAsync(TopicId, BlockId);
             _contentLoaded = true;
             _expanded = true;
+            _renderedHtml = string.IsNullOrEmpty(_content.Content)
+                ? null
+                : Markdown.ToHtml(_content.Content);
             _state.SetParagraphs(BlockId, _content.Paragraphs.ToList());
             if (!string.IsNullOrEmpty(_content.StarterCode)) _state.SetPlaygroundCode(_content.StarterCode);
             await OnContentLoaded.InvokeAsync(_content);

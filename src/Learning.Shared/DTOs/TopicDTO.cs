@@ -27,6 +27,11 @@ public class BlockHeaderDto
     public BlockType Type { get; set; }
     public string Title { get; set; } = string.Empty;
     public int Order { get; set; }
+
+    /// <summary>
+    /// Whether this block currently has system-generated content persisted in the database.
+    /// </summary>
+    public bool HasContent { get; set; }
 }
 
 /// <summary>
@@ -50,6 +55,11 @@ public class TopicBlockDto
     public IReadOnlyList<ParagraphDto> Paragraphs { get; set; } = Array.Empty<ParagraphDto>();
 
     public string? StarterCode { get; set; }
+
+    /// <summary>
+    /// Whether this block has system-generated content available.
+    /// </summary>
+    public bool HasContent { get; set; }
 }
 
 /// <summary>

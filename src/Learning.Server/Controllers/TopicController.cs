@@ -35,6 +35,7 @@ public class TopicController : ControllerBase
     {
         var topic = await _db.RoadmapTopics
             .Include(t => t.Blocks.OrderBy(b => b.Order))
+                .ThenInclude(b => b.Paragraphs)
             .FirstOrDefaultAsync(t => t.Id == topicId, ct);
 
         if (topic == null) return NotFound();
@@ -44,7 +45,8 @@ public class TopicController : ControllerBase
             Id = b.Id,
             Type = b.Type,
             Title = b.Title,
-            Order = b.Order
+            Order = b.Order,
+            HasContent = b.Paragraphs.Any(p => p.CreatedBy == ContentAuthor.System)
         }).ToList();
 
         LearnerTopicState? state = null;
@@ -134,6 +136,49 @@ public class TopicController : ControllerBase
         return Ok(blockDto);
     }
 
+
+    /// <summary>
+    /// Deletes all generated content (system paragraphs and their replies) for a block.
+    /// </summary>
+    [HttpDelete("{topicId}/blocks/{blockId}/content")]
+    public async Task<IActionResult> DeleteBlockContent(Guid topicId, Guid blockId, CancellationToken ct)
+    {
+        var paragraphs = await _db.ParagraphThreads
+            .Where(p => p.BlockId == blockId)
+            .ToListAsync(ct);
+
+        // Find the system-generated root paragraph
+        var systemPara = paragraphs.FirstOrDefault(p => p.CreatedBy == ContentAuthor.System);
+        if (systemPara == null) return NoContent(); // Already empty
+
+        // Collect all descendants of the system paragraph (replies, replies-of-replies, etc.)
+        var toDelete = new HashSet<Guid> { systemPara.Id };
+        bool expanded;
+        do
+        {
+            expanded = false;
+            foreach (var p in paragraphs)
+            {
+                if (!toDelete.Contains(p.Id) && p.ParentParagraphId.HasValue && toDelete.Contains(p.ParentParagraphId.Value))
+                {
+                    toDelete.Add(p.Id);
+                    expanded = true;
+                }
+            }
+        } while (expanded);
+
+        // Delete bottom-up to satisfy FK constraints
+        var deleteOrder = paragraphs.Where(p => toDelete.Contains(p.Id))
+            .OrderByDescending(p => p.Depth)
+            .ThenBy(p => p.CreatedAt);
+        _db.ParagraphThreads.RemoveRange(deleteOrder);
+
+        await _db.SaveChangesAsync(ct);
+        _logger.LogInformation("Deleted generated content for block {BlockId}", blockId);
+        return NoContent();
+    }
+
+    /// <summary>
     /// <summary>
     /// Adds a paragraph to the thread (user question or AI response).
     /// </summary>
