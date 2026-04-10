@@ -1,28 +1,29 @@
 @using Markdig
+@using Learning.Shared.Enums
 @inject ApiClient _api
 @inject StateService _state
 
 <div class="paragraph-thread mt-4">
-    @if (_paragraphs.Count == 0)
+    @if (_rootParagraphs.Count == 0)
     {
         <p class="text-muted fst-italic">No questions yet. Ask one below!</p>
     }
     else
     {
-        @foreach (var para in _paragraphs.Where(p => p.Depth == 0))
+        @foreach (var para in _rootParagraphs)
         {
             <div class="thread-item mb-2 p-2 border-start border-3 border-primary">
                 <div class="d-flex justify-content-between mb-1">
                     <small class="text-muted text-uppercase">@para.CreatedBy</small>
                     <small class="text-muted">@para.CreatedAt.ToString("g")</small>
                 </div>
-                <p class="mb-1">@para.Text</p>
-                @foreach (var reply in _paragraphs.Where(r => r.ParentParagraphId == para.Id))
+                <div class="markdown-content">@((MarkupString)_rendered[para.Id])</div>
+                @foreach (var reply in _repliesByParent.GetValueOrDefault(para.Id, []))
                 {
                     <div class="ms-4 mt-1 thread-item p-2 border-start border-3 border-info">
                         <small class="text-muted">@reply.CreatedBy</small>
                         <small class="text-muted ms-2">@reply.CreatedAt.ToString("g")</small>
-                        <p class="mb-1">@reply.Text</p>
+                        <div class="markdown-content">@((MarkupString)_rendered[reply.Id])</div>
                     </div>
                 }
             </div>
@@ -53,14 +54,31 @@
     [Parameter] public Guid TopicId { get; set; }
     [Parameter] public List<ParagraphDto> Paragraphs { get; set; } = new();
 
-    private List<ParagraphDto> _paragraphs = new();
+    private List<ParagraphDto> _rootParagraphs = new();
+    private Dictionary<Guid, List<ParagraphDto>> _repliesByParent = new();
+    private Dictionary<Guid, string> _rendered = new();
     private string _question = "";
     private ExplanationContext _contextType = ExplanationContext.Short;
     private bool _loading;
 
     protected override void OnParametersSet()
     {
-        _paragraphs = Paragraphs;
+        // Exclude System-authored paragraphs — they duplicate the markdown rendered in the block body.
+        var conversation = Paragraphs.Where(p => p.CreatedBy != ContentAuthor.System).ToList();
+        _rootParagraphs = conversation.Where(p => p.Depth == 0).ToList();
+        _repliesByParent = conversation
+            .Where(p => p.ParentParagraphId.HasValue)
+            .GroupBy(p => p.ParentParagraphId!.Value)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        // Pre-render markdown to HTML for every paragraph.
+        _rendered = new();
+        foreach (var p in conversation)
+        {
+            _rendered[p.Id] = string.IsNullOrWhiteSpace(p.Text)
+                ? "<em class=\"text-muted\">(no text)</em>"
+                : Markdown.ToHtml(p.Text);
+        }
     }
 
     private async Task AskQuestion()
@@ -74,9 +92,16 @@
                 TopicId = TopicId, BlockId = BlockId, Question = _question,
                 Context = _contextType, UserId = "user1"
             });
-            _paragraphs.Add(response);
+            
+            // Render the AI response as markdown and add to thread state.
+            _rendered[response.Id] = Markdown.ToHtml(response.Text);
+            _rootParagraphs.Add(response);
+            
+            // Update full paragraph list including the new paragraph.
+            Paragraphs.Add(response);
+            _state.SetParagraphs(BlockId, Paragraphs);
+            
             _question = "";
-            _state.SetParagraphs(BlockId, _paragraphs);
         }
         catch (Exception ex) { Console.WriteLine($"Ask failed: {ex.Message}"); }
         finally { _loading = false; }
