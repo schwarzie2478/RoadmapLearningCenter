@@ -61,6 +61,25 @@ The .NET Aspire Dashboard gives you a live view of all running components:
 
 No separate setup needed — the dashboard launches automatically with `Start-All.ps1` and sends telemetry from any service that references `Learning.ServiceDefaults`.
 
+## Configuring Secrets (Aspire User Secrets)
+
+The AppHost uses [.NET user-secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) to hold API keys and credentials. These are injected automatically into downstream projects at runtime.
+
+To add or update a secret, run from the repo root:
+
+```powershell
+dotnet user-secrets set LLM__OpenRouter__ApiKey "your-key" --project src/Learning.AppHost
+dotnet user-secrets set LLM__OpenAI__ApiKey "your-key"   --project src/Learning.AppHost
+```
+
+Only one provider is required. Without either key the roadmap, progress tracking, and code playground still work — AI-generated explanations and Q&A will fail at runtime.
+
+To verify all stored secrets:
+
+```powershell
+dotnet user-secrets list --project src/Learning.AppHost
+```
+
 ## Initial Curriculum
 
 | Track | Topics |
@@ -79,11 +98,7 @@ Each topic ships with 1–3 learning blocks and seed prompts for AI-generated ex
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [.NET Aspire workload](https://learn.microsoft.com/dotnet/aspire/) (`dotnet workload install aspire`)
 
-Optional for AI features — set one of:
-- `LLM__OpenRouter__ApiKey` environment variable
-- `LLM__OpenAI__ApiKey` environment variable
-
-Without a key, the roadmap, progress tracking, and code playground still work. AI-generated explanations and Q&A will fail at runtime.
+See **Configuring Secrets** above for setting AI provider API keys.
 
 ## Project Structure
 

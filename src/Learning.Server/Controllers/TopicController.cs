@@ -86,15 +86,14 @@ public class TopicController : ControllerBase
         string content;
         if (existingParagraphs.Count == 0)
         {
-            // Generate content on-demand
+            // Generate and persist content on-demand.
+            // Guard against concurrent requests that both see Count == 0.
             content = await _ai.GenerateBlockContentAsync(topicId, blockId, ct);
 
-            // Save the generated content as a system-authored paragraph so we don't regenerate
-            var existing = await _db.TopicBlocks
-                .Include(b => b.Paragraphs)
-                .FirstOrDefaultAsync(b => b.Id == blockId, ct);
+            var saved = await _db.ParagraphThreads
+                .FirstOrDefaultAsync(p => p.BlockId == blockId && p.CreatedBy == ContentAuthor.System, ct);
 
-            if (existing != null)
+            if (saved == null)
             {
                 var systemPara = new ParagraphThread
                 {
@@ -105,10 +104,15 @@ public class TopicController : ControllerBase
                     Depth = 0,
                     CreatedAt = DateTime.UtcNow
                 };
-                existing.Paragraphs.Add(systemPara);
+                _db.ParagraphThreads.Add(systemPara);
                 await _db.SaveChangesAsync(ct);
-
                 existingParagraphs = new List<ParagraphThread> { systemPara };
+            }
+            else
+            {
+                // A concurrent request already inserted the paragraph — use it.
+                existingParagraphs = new List<ParagraphThread> { saved };
+                content = saved.Text;
             }
         }
         else
