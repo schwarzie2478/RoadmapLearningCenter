@@ -1,0 +1,78 @@
+@page "/roadmap"
+@inject ApiClient _api
+@inject StateService _state
+@inject NavigationManager _nav
+
+<PageTitle>Roadmap — Learning</PageTitle>
+
+<div class="container-fluid py-4">
+    <h2 class="mb-4">Learning Roadmap</h2>
+
+    @if (_loading)
+    {
+        <div class="d-flex justify-content-center py-5">
+            <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+    else if (_topics.Count == 0)
+    {
+        <div class="alert alert-info">No topics found. The roadmap is empty.</div>
+    }
+    else
+    {
+        @foreach (var trackGroup in _topics.GroupBy(t => t.Track))
+        {
+            <div class="mb-4">
+                <h4 class="track-title">@trackGroup.Key</h4>
+                <div class="row g-3">
+                    @foreach (var topic in trackGroup.OrderBy(t => t.Order))
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card topic-card h-100"
+                                 @onclick="() => NavigateToTopic(topic.Id)"
+                                 style="cursor: pointer;">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title mb-0">@topic.Title</h5>
+                                        <span class="badge bg-secondary">@topic.Difficulty</span>
+                                    </div>
+                                    <p class="card-text text-muted small">@topic.Description</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<RoadmapTopicDto> _topics = new();
+    private bool _loading;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        try
+        {
+            var response = await _api.GetRoadmapAsync();
+            _topics = response.Topics.ToList();
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to load roadmap: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void NavigateToTopic(Guid id) => _nav.NavigateTo($"/topic/{id}");
+}

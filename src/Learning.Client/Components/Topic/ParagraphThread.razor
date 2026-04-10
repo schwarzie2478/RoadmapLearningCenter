@@ -1,0 +1,83 @@
+@inject ApiClient _api
+@inject StateService _state
+
+<div class="paragraph-thread mt-4">
+    @if (_paragraphs.Count == 0)
+    {
+        <p class="text-muted fst-italic">No questions yet. Ask one below!</p>
+    }
+    else
+    {
+        @foreach (var para in _paragraphs.Where(p => p.Depth == 0))
+        {
+            <div class="thread-item mb-2 p-2 border-start border-3 border-primary">
+                <div class="d-flex justify-content-between mb-1">
+                    <small class="text-muted text-uppercase">@para.CreatedBy</small>
+                    <small class="text-muted">@para.CreatedAt.ToString("g")</small>
+                </div>
+                <p class="mb-1">@para.Text</p>
+                @foreach (var reply in _paragraphs.Where(r => r.ParentParagraphId == para.Id))
+                {
+                    <div class="ms-4 mt-1 thread-item p-2 border-start border-3 border-info">
+                        <small class="text-muted">@reply.CreatedBy</small>
+                        <small class="text-muted ms-2">@reply.CreatedAt.ToString("g")</small>
+                        <p class="mb-1">@reply.Text</p>
+                    </div>
+                }
+            </div>
+        }
+    }
+
+    <div class="ask-box mt-3 p-3 bg-light rounded">
+        <div class="mb-2">
+            <select class="form-select form-select-sm" style="width: auto;"
+                    @bind="_contextType">
+                <option value="@ExplanationContext.Short">Short</option>
+                <option value="@ExplanationContext.Deep">Deep</option>
+                <option value="@ExplanationContext.Analogy">Analogy</option>
+            </select>
+        </div>
+        <div class="d-flex gap-2">
+            <input type="text" class="form-control" placeholder="Ask a question..."
+                   @bind="_question" @bind:event="oninput" />
+            <button class="btn btn-sm btn-primary" @onclick="AskQuestion" disabled="@_loading">
+                @(_loading ? "..." : "Ask AI")
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid BlockId { get; set; }
+    [Parameter] public Guid TopicId { get; set; }
+    [Parameter] public List<ParagraphDto> Paragraphs { get; set; } = new();
+
+    private List<ParagraphDto> _paragraphs = new();
+    private string _question = "";
+    private ExplanationContext _contextType = ExplanationContext.Short;
+    private bool _loading;
+
+    protected override void OnParametersSet()
+    {
+        _paragraphs = Paragraphs;
+    }
+
+    private async Task AskQuestion()
+    {
+        if (string.IsNullOrWhiteSpace(_question)) return;
+        _loading = true;
+        try
+        {
+            var response = await _api.AskQuestionAsync(new AIAskRequest
+            {
+                TopicId = TopicId, BlockId = BlockId, Question = _question,
+                Context = _contextType, UserId = "user1"
+            });
+            _paragraphs.Add(response);
+            _question = "";
+            _state.SetParagraphs(BlockId, _paragraphs);
+        }
+        catch (Exception ex) { Console.WriteLine($"Ask failed: {ex.Message}"); }
+        finally { _loading = false; }
+    }
+}

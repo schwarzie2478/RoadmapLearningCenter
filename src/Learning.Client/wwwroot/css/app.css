@@ -1,0 +1,152 @@
+<!-- Minimal CSS overrides for the learning environment -->
+
+/* Layout */
+.sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 220px;
+    background-color: #0a192f;
+    padding: 1rem;
+    z-index: 1000;
+}
+
+.sidebar-brand {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #64ffda;
+    padding: 0.5rem 0 1rem;
+}
+
+.sidebar .nav-link {
+    color: #8892b0;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    color: #64ffda;
+    background-color: rgba(100, 255, 218, 0.1);
+}
+
+.main-content {
+    margin-left: 220px;
+    padding: 1rem 2rem;
+}
+
+/* Topic Cards */
+.topic-card {
+    border-left: 4px solid #0a192f;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.topic-card:hover {
+    border-color: #64ffda;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Block Content */
+.block-content pre {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    padding: 1rem;
+    border-radius: 4px;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    overflow-x: auto;
+}
+
+/* Thread Items */
+.thread-item {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    line-height: 1.5;
+}
+
+/* Playground */
+.playground-output pre {
+    background-color: #1e1e1e;
+    color: #d4d4d4;
+    padding: 1rem;
+    border-radius: 4px;
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Badges */
+.confidence-badge {
+    background-color: #e9ecef;
+    color: #495057;
+    font-size: 0.8rem;
+}
+
+.state-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, #0a192f 0%, #172a45 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+}
+
+.hero-section h1 {
+    color: white;
+}
+
+.hero-section .lead {
+    color: #8892b0;
+}
+
+/* Track title */
+.track-title {
+    color: #0a192f;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #64ffda;
+    padding-bottom: 0.5rem;
+}
+
+/* Difficulty Badges */
+.difficulty-beginner .badge { background-color: #d4edda; color: #155724; }
+.difficulty-intermediate .badge { background-color: #fff3cd; color: #856404; }
+.difficulty-advanced .badge { background-color: #f8d7da; color: #721c24; }
+
+/* Block type colors */
+.block-intro {
+    border-left: 4px solid #6f42c1;
+}
+
+.block-explanation {
+    border-left: 4px solid #0d6efd;
+}
+
+.block-example {
+    border-left: 4px solid #198754;
+}
+
+.block-exercise {
+    border-left: 4px solid #fd7e14;
+}
+
+.block-quiz {
+    border-left: 4px solid #dc3545;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+    .main-content {
+        margin-left: 0;
+    }
+}

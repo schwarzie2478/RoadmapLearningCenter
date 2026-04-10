@@ -1,0 +1,82 @@
+@using Learning.Client.Components.Topic
+@inject ApiClient _api
+@inject StateService _state
+
+<div class="card block-@Header.Type.ToString().ToLowerInvariant() mb-2">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <span class="badge bg-secondary me-2">@Header.Type</span>
+            <strong>@Header.Title</strong>
+        </div>
+        <div>
+            @if (_contentLoaded)
+            {
+                <button class="btn btn-sm btn-outline-secondary"
+                        @onclick="() => SetExpanded(false)">Collapse</button>
+            }
+            else
+            {
+                <button class="btn btn-sm btn-primary"
+                        @onclick="LoadContent"
+                        disabled="@_loading">
+                    @(_loading ? "Loading..." : "Explore")
+                </button>
+            }
+        </div>
+    </div>
+    @if (_expanded && _content != null)
+    {
+        <div class="card-body">
+            <div class="block-content">
+                @((MarkupString)_content.Content)
+            </div>
+
+            @if (_content.Paragraphs?.Count > 0)
+            {
+                <hr/>
+                <h6>Discussion Thread</h6>
+                <ParagraphThread BlockId="@BlockId" TopicId="@TopicId" Paragraphs="@_content.Paragraphs.ToList()"/>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid TopicId { get; set; }
+    [Parameter] public Guid BlockId { get; set; }
+    [Parameter, EditorRequired] public BlockHeaderDto Header { get; set; } = null!;
+    [Parameter] public EventCallback<TopicBlockDto> OnContentLoaded { get; set; }
+
+    private bool _expanded;
+    private bool _loading;
+    private bool _contentLoaded;
+    private TopicBlockDto? _content;
+
+    public void SetExpanded(bool value)
+    {
+        _expanded = value;
+        if (value) _state.ToggleBlock(BlockId);
+    }
+
+    private async Task LoadContent()
+    {
+        _loading = true;
+        try
+        {
+            _content = await _api.GetBlockAsync(TopicId, BlockId);
+            _contentLoaded = true;
+            _expanded = true;
+            _state.SetParagraphs(BlockId, _content.Paragraphs.ToList());
+            if (!string.IsNullOrEmpty(_content.StarterCode)) _state.SetPlaygroundCode(_content.StarterCode);
+            await OnContentLoaded.InvokeAsync(_content);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to load block: {ex.Message}");
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

@@ -1,0 +1,89 @@
+@page "/review"
+@inject ApiClient _api
+@inject StateService _state
+@inject NavigationManager _nav
+
+<PageTitle>Review — Learning</PageTitle>
+
+<div class="container-fluid py-4">
+    <h2 class="mb-4">Review Topics</h2>
+
+    @if (_loading)
+    {
+        <div class="d-flex justify-content-center py-5">
+            <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+        </div>
+    }
+    else if (_reviewList.Count == 0)
+    {
+        <div class="alert alert-success">No topics need review right now. Great job!</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Topic</th>
+                        <th>Status</th>
+                        <th>Confidence</th>
+                        <th>Last Visited</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in _reviewList)
+                    {
+                        <tr>
+                            <td>@item.TopicTitle</td>
+                            <td><StatusBadge Status="@item.Status" /></td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="range" class="form-range" style="width: 100px;"
+                                           min="0" max="100" step="5"
+                                           value="@item.Confidence.ToString()" />
+                                    <span>@item.Confidence</span>
+                                </div>
+                            </td>
+                            <td>@item.LastVisitedAt.ToShortDateString()</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => Revisit(item.TopicId)">Revisit</button>
+                                @if (item.Status != TopicStatus.Done)
+                                {
+                                    <button class="btn btn-sm btn-success" @onclick="() => MarkDone(item)">Mark Done</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private List<LearnerTopicStateDto> _reviewList = new();
+    private bool _loading;
+    private const string UserId = "user1";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        try { _reviewList = await _api.GetReviewListAsync(UserId); }
+        catch { /* API may not be running */ }
+        finally { _loading = false; }
+    }
+
+    private void Revisit(Guid topicId) => _nav.NavigateTo($"/topic/{topicId}");
+
+    private async Task MarkDone(LearnerTopicStateDto item)
+    {
+        await _api.UpdateProgressAsync(item.TopicId, new UpdateProgressRequest
+        {
+            Status = TopicStatus.Done,
+            Confidence = Math.Max(item.Confidence, 60),
+            UserId = UserId
+        });
+        _reviewList = await _api.GetReviewListAsync(UserId);
+    }
+}

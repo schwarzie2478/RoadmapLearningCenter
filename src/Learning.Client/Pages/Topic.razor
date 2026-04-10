@@ -1,0 +1,72 @@
+@page "/topic/{topicId:guid}"
+@inject ApiClient _api
+@inject StateService _state
+@inject NavigationManager _nav
+
+<PageTitle>Topic — Learning</PageTitle>
+
+@if (_loading)
+{
+    <div class="d-flex justify-content-center py-5">
+        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+    </div>
+}
+else if (_topic == null)
+{
+    <div class="alert alert-danger">Topic not found.</div>
+}
+else
+{
+    <div class="container-fluid py-4">
+        <a href="/roadmap" class="btn btn-sm btn-outline-secondary mb-3">← Back to Roadmap</a>
+        <h2>@_topic.Title</h2>
+        <p class="text-muted">@_topic.Description</p>
+        <div class="d-flex gap-2 mb-3">
+            <span class="badge bg-primary">@_topic.Track</span>
+            <StatusBadge Status="@(_topic.LearnerStatus ?? TopicStatus.NotStarted)" />
+            @if (_topic.LearnerConfidence.HasValue)
+            { <span class="badge bg-info">Confidence: @_topic.LearnerConfidence.Value%</span> }
+        </div>
+        <div class="mb-4">
+            <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => UpdateStatus(TopicStatus.Exploring)">Exploring</button>
+            <button class="btn btn-sm btn-outline-success me-1" @onclick="() => UpdateStatus(TopicStatus.Done)">Done</button>
+            <button class="btn btn-sm btn-outline-warning" @onclick="() => UpdateStatus(TopicStatus.NeedReview)">Need Review</button>
+        </div>
+        <hr/>
+        <h4>Blocks</h4>
+        @foreach (var block in _topic.Blocks)
+        {
+            <div class="mb-3">
+                <TopicBlock TopicId="@topicId" BlockId="@block.Id" Header="@block" OnContentLoaded="BlockDataLoaded" />
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public Guid topicId { get; set; }
+    private TopicSummaryDto? _topic;
+    private bool _loading;
+    private const string UserId = "user1";
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        try { _topic = await _api.GetTopicAsync(topicId, UserId); }
+        catch { _topic = null; }
+        finally { _loading = false; }
+    }
+
+    private async Task UpdateStatus(TopicStatus status)
+    {
+        await _api.UpdateProgressAsync(topicId, new UpdateProgressRequest { Status = status, UserId = UserId });
+        _topic = await _api.GetTopicAsync(topicId, UserId);
+        StateHasChanged();
+    }
+
+    private void BlockDataLoaded(TopicBlockDto block)
+    {
+        _state.SetParagraphs(block.Id, block.Paragraphs.ToList());
+        if (!string.IsNullOrEmpty(block.StarterCode)) _state.SetPlaygroundCode(block.StarterCode);
+    }
+}

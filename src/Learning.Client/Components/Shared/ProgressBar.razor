@@ -1,0 +1,15 @@
+<div class="progress" style="height: 8px;">
+    <div class="progress-bar @(Value < 30 ? "bg-danger" : Value < 60 ? "bg-warning" : "bg-success")" role="progressbar" style="width: @ClampedPct" aria-valuenow="@ClampedInt" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+@if (!string.IsNullOrEmpty(Label))
+{
+    <small class="text-muted">@Label: @ClampedPct</small>
+}
+
+@code {
+    [Parameter] public float Value { get; set; }
+    [Parameter] public string Label { get; set; } = string.Empty;
+
+    private int ClampedInt => (int)Math.Clamp(Value, 0, 100);
+    private string ClampedPct => $"{ClampedInt}%";
+}

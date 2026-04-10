@@ -1,0 +1,23 @@
+<span class="badge @GetCssClass()">@GetText()</span>
+
+@code {
+    [Parameter] public TopicStatus Status { get; set; }
+
+    private string GetCssClass() => Status switch
+    {
+        TopicStatus.NotStarted => "bg-secondary",
+        TopicStatus.Exploring => "bg-info",
+        TopicStatus.NeedReview => "bg-warning",
+        TopicStatus.Done => "bg-success",
+        _ => "bg-secondary"
+    };
+
+    private string GetText() => Status switch
+    {
+        TopicStatus.NotStarted => "Not Started",
+        TopicStatus.Exploring => "Exploring",
+        TopicStatus.NeedReview => "Needs Review",
+        TopicStatus.Done => "Done",
+        _ => Status.ToString()
+    };
+}

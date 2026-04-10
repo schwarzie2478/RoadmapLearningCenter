@@ -1,0 +1,22 @@
+## .NET
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.userprefs
+*.pidb
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build
+msbuild.binlog
+
+## IDE
+.vs/
+.idea/
+
+## OS
+Thumbs.db
+.DS_Store
