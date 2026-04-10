@@ -13,8 +13,11 @@ public static class SeedData
 {
     public static async Task EnsureSeeded(AppDbContext db, CancellationToken ct = default)
     {
-        if (await db.RoadmapTopics.AnyAsync(ct))
+        if (await db.RoadmapTopics.AnyAsync(t => t.Id == Guid.Parse("10000000-0000-0000-0000-000000000008"), ct))
             return;
+
+
+
 
         // --- Foundation Track ---
         var csharpBasics = new RoadmapTopic
@@ -507,7 +510,16 @@ public static class SeedData
             blazorComponents, fullStackProject, seniorPatterns,
         };
 
-        db.RoadmapTopics.AddRange(allTopics);
-        await db.SaveChangesAsync(ct);
+        // Insert only topics that don't already exist (EF will upsert by PK, avoiding duplicates).
+        var existingIds = await db.RoadmapTopics.Select(e => e.Id).ToHashSetAsync(ct);
+        var toInsert = allTopics.Where(t => !existingIds.Contains(t.Id)).ToList();
+        if (toInsert.Any())
+        {
+            db.RoadmapTopics.AddRange(toInsert);
+            await db.SaveChangesAsync(ct);
+        }
+        return; // nothing new to add
+
+
     }
 }

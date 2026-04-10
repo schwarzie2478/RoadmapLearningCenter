@@ -44,6 +44,25 @@
                                 </div>
                             </div>
                         </div>
+                        @if (topic.Children.Count > 0)
+                        {
+                            @foreach (var child in topic.Children.OrderBy(c => c.Order))
+                            {
+                                <div class="col-md-6 col-lg-4 offset-lg-1">
+                                    <div class="card topic-card h-100"
+                                         @onclick="() => NavigateToTopic(child.Id)"
+                                         style="cursor: pointer;">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0">↳ @child.Title</h5>
+                                                <span class="badge bg-info">@child.Difficulty</span>
+                                            </div>
+                                            <p class="card-text text-muted small">@child.Description</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
                     }
                 </div>
             </div>
