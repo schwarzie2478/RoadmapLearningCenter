@@ -65,28 +65,385 @@ public static class SeedData
             Prerequisites = new List<Guid> { csharpBasics.Id, oop.Id },
             Blocks = new List<TopicBlock>
             {
-                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000301"), Title = "Minimal APIs", Type = BlockType.Intro, SeedPrompt = "Explain IApplicationBuilder, WebApplication builder, route groups, and endpoint conventions.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000301"), Title = "Minimal APIs", Type = BlockType.Intro, SeedPrompt = "Explain IApplicationBuilder, WebApplication builder, route groups, and endpoint convention.", Order = 1 },
                 new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000302"), Title = "Dependency Injection", Type = BlockType.Explanation, SeedPrompt = "Explain AddScoped, AddTransient, AddSingleton, IServiceCollection, and factory patterns.", Order = 2 },
                 new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000303"), Title = "Middleware Pipeline", Type = BlockType.Explanation, SeedPrompt = "Explain Use, Run, Map, ordering, short-circuiting, and custom middleware components.", Order = 3 },
             }
         };
 
-        var efCore = new RoadmapTopic
+        var generalDevelopmentSkills = new RoadmapTopic
         {
-            Id = Guid.Parse("10000000-0000-0000-0000-000000000004"),
-            Title = "Entity Framework Core",
-            Slug = "ef-core",
-            Description = "DbContext, migrations, LINQ queries, relationships, and performance.",
-            Track = RoadmapTrack.Backend,
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000008"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "General Development Skills",
+            Slug = "general-development-skills",
+            Description = "Git, HTTP basics, TLS/SSL, search skills, algorithms, AI/LLM tools.",
+            Track = RoadmapTrack.Foundation,
+            Order = 1,
+            Difficulty = Difficulty.Beginner,
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000801"), Title = "Git & HTTP", Type = BlockType.Intro, SeedPrompt = "Explain Git basics (clone, commit, branch, merge, push/pull), HTTP methods (GET/POST/PUT/DELETE/OPTIONS), and the request/response lifecycle.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000802"), Title = "TLS/SSL & Security Basics", Type = BlockType.Explanation, SeedPrompt = "Explain TLS and SSL, how certificates work, certificate management, and HTTPS enforcement in ASP.NET Core.", Order = 2 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000803"), Title = "AI & LLM Tools", Type = BlockType.Explanation, SeedPrompt = "Using ChatGPT, Claude, and Gemini for development, Cursor AI features, Model Context Protocols (MCPs), Semantic Kernel, and the OpenAI .NET SDK.", Order = 3 },
+            }
+        };
+
+        var advancedCSharp = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000009"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Advanced C#",
+            Slug = "csharp-advanced",
+            Description = "Advanced C# language features, .NET CLI, and code quality.",
+            Track = RoadmapTrack.Foundation,
             Order = 2,
+            Difficulty = Difficulty.Beginner,
+            Prerequisites = new List<Guid> { csharpBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000901"), Title = "Advanced C# Features", Type = BlockType.Explanation, SeedPrompt = "Explain records, pattern matching, nullable reference types, spans, ref structs, and source generators with practical examples.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000902"), Title = ".NET CLI & Tooling", Type = BlockType.Example, SeedPrompt = "Show dotnet new, build, publish, tool manifest (.NET tools), global.json, and NuGet package management workflows.", Order = 2 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000903"), Title = "Code Quality", Type = BlockType.Explanation, SeedPrompt = "Explain StyleCop rules, analyzers, editorconfig, Roslyn source generators, and nullable context in modern C#.", Order = 3 },
+            }
+        };
+
+        var sqlFundamentals = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000010"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "SQL Fundamentals",
+            Slug = "sql-fundamentals",
+            Description = "T-SQL querying fundamentals, joins, indexes, and stored procedures.",
+            Track = RoadmapTrack.Backend,
+            Order = 3,
+            Difficulty = Difficulty.Beginner,
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000a01"), Title = "T-SQL Basics", Type = BlockType.Intro, SeedPrompt = "Explain SELECT, FROM, WHERE, ORDER BY, GROUP BY, and HAVING. Cover query execution order and basic filtering.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000a02"), Title = "Joins & Subqueries", Type = BlockType.Explanation, SeedPrompt = "Explain INNER, LEFT, RIGHT, FULL JOINs. Cover EXISTS, IN, correlated subqueries, CTEs, and window functions.", Order = 2 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000a03"), Title = "Indexes & Performance", Type = BlockType.Example, SeedPrompt = "Show clustered vs non-clustered indexes, reading execution plans, covering indexes, and query optimization techniques.", Order = 3 },
+            }
+        };
+
+        var solidPrinciples = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000011"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "SOLID Principles",
+            Slug = "solid-principles",
+            Description = "Five design principles for maintainable, extensible object-oriented code.",
+            Track = RoadmapTrack.Backend,
+            Order = 4,
+            Difficulty = Difficulty.Beginner,
+            Prerequisites = new List<Guid> { aspnetCoreBasics.Id, oop.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000b01"), Title = "SRP & OCP", Type = BlockType.Explanation, SeedPrompt = "Explain Single Responsibility and Open-Closed Principles with C# examples, common violations, and how to fix them.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000b02"), Title = "LSP, ISP & DIP", Type = BlockType.Explanation, SeedPrompt = "Explain Liskov Substitution, Interface Segregation, and Dependency Inversion with real violations and refactored fixes.", Order = 2 },
+            }
+        };
+
+        var ormFundamentals = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000012"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "ORM Fundamentals",
+            Slug = "orm-basics",
+            Description = "EF Core as primary ORM, Dapper for micro-ORM scenarios.",
+            Track = RoadmapTrack.Backend,
+            Order = 5,
+            Difficulty = Difficulty.Intermediate,
+            Prerequisites = new List<Guid> { Guid.Parse("10000000-0000-0000-0000-000000000010"), aspnetCoreBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000c01"), Title = "EF Core Fundamentals", Type = BlockType.Explanation, SeedPrompt = "Explain DbContext, entity configuration, Fluent API, migrations, and querying patterns in EF Core.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000c02"), Title = "Dapper", Type = BlockType.Example, SeedPrompt = "Show Dapper for raw SQL performance, POCO mapping, and when to choose Dapper over EF Core.", Order = 2 },
+            }
+        };
+
+        var advancedDependencyInjection = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000013"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Advanced Dependency Injection",
+            Slug = "dependency-injection-advanced",
+            Description = "Service lifetimes, DI containers, registration patterns.",
+            Track = RoadmapTrack.Backend,
+            Order = 6,
+            Difficulty = Difficulty.Beginner,
+            Prerequisites = new List<Guid> { aspnetCoreBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000d01"), Title = "Service Lifetimes", Type = BlockType.Intro, SeedPrompt = "Explain Transient, Scoped, and Singleton with concrete examples and common service capture bugs.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000d02"), Title = "DI Containers", Type = BlockType.Explanation, SeedPrompt = "Explain Microsoft.Extensions.DependencyInjection, AutoFac integration, and factory patterns for complex registrations.", Order = 2 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000d03"), Title = "Scrutor & Conventions", Type = BlockType.Example, SeedPrompt = "Show assembly scanning with Scrutor, decoration patterns, and convention-based service registration.", Order = 3 },
+            }
+        };
+
+        var databases = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000014"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Databases",
+            Slug = "databases",
+            Description = "Relational databases, search engines, and NoSQL stores.",
+            Track = RoadmapTrack.Backend,
+            Order = 7,
+            Difficulty = Difficulty.Intermediate,
+            Prerequisites = new List<Guid> { Guid.Parse("10000000-0000-0000-0000-000000000010"), aspnetCoreBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000e01"), Title = "Relational Databases", Type = BlockType.Intro, SeedPrompt = "Compare SQL Server, PostgreSQL, MySQL, and MariaDB - strengths, trade-offs, and when to choose each.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000e02"), Title = "Search Engines", Type = BlockType.Explanation, SeedPrompt = "Explain ElasticSearch, Meilisearch, OpenSearch, and ManticoreSearch for full-text and vector search scenarios.", Order = 2 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000e03"), Title = "NoSQL Stores", Type = BlockType.Explanation, SeedPrompt = "Explain Redis, MongoDB, Cassandra, LiteDB, RavenDB, CouchDB, CosmosDB, and DynamoDB. Cover CAP trade-offs and use cases.", Order = 3 },
+            }
+        };
+
+        var cachingStrategies = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000015"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Caching Strategies",
+            Slug = "caching",
+            Description = "In-memory, distributed, response, and output caching strategies.",
+            Track = RoadmapTrack.Backend,
+            Order = 8,
             Difficulty = Difficulty.Intermediate,
             Prerequisites = new List<Guid> { aspnetCoreBasics.Id },
             Blocks = new List<TopicBlock>
             {
-                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000401"), Title = "DbContext & Models", Type = BlockType.Explanation, SeedPrompt = "Explain DbSet, OnConfiguring, Fluent API, Value conversions, and seed data.", Order = 1 },
-                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000402"), Title = "Migrations", Type = BlockType.Explanation, SeedPrompt = "Explain add-migration, update-database, scripting, reverting, and production deployment.", Order = 2 },
-                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000403"), Title = "Query Performance", Type = BlockType.Explanation, SeedPrompt = "Explain Include vs Select, explicit loading, split queries, compiled queries, and batched updates.", Order = 3 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000f01"), Title = "Memory & Distributed Cache", Type = BlockType.Intro, SeedPrompt = "Explain IMemoryCache vs IDistributedCache, Redis with StackExchange.Redis and EasyCaching, and Memcached.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000f02"), Title = "Response & Output Caching", Type = BlockType.Explanation, SeedPrompt = "Explain built-in response caching, Marvin.Cache.Headers, output caching middleware, and EF Core 2nd-level cache.", Order = 2 },
             }
+        };
+
+        var loggingFrameworks = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000016"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Logging Frameworks",
+            Slug = "log-frameworks",
+            Description = "Structured logging with Serilog and NLog.",
+            Track = RoadmapTrack.Backend,
+            Order = 9,
+            Difficulty = Difficulty.Beginner,
+            Prerequisites = new List<Guid> { aspnetCoreBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001001"), Title = "Structured Logging", Type = BlockType.Intro, SeedPrompt = "Explain ILogger, Serilog sinks, enrichers, and structured properties for machine-parseable log output.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001002"), Title = "Serilog & NLog", Type = BlockType.Explanation, SeedPrompt = "Compare Serilog and NLog configuration, sinks (Console, File, Seq, Elasticsearch), and performance characteristics.", Order = 2 },
+            }
+        };
+
+        var apiClientsComms = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000017"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "API Clients & Communications",
+            Slug = "api-communications",
+            Description = "REST patterns, gRPC, and GraphQL.",
+            Track = RoadmapTrack.Backend,
+            Order = 10,
+            Difficulty = Difficulty.Intermediate,
+            Prerequisites = new List<Guid> { aspnetCoreBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001101"), Title = "REST Patterns", Type = BlockType.Intro, SeedPrompt = "Explain Gridify filtering, OData conventions, REPR pattern with Minimal APIs, and FastEndpoints.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001102"), Title = "gRPC", Type = BlockType.Explanation, SeedPrompt = "Explain Protobuf contracts, ASP.NET Core gRPC server/client setup, and unary vs streaming communication.", Order = 2 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001103"), Title = "GraphQL", Type = BlockType.Explanation, SeedPrompt = "Compare HotChocolate vs GraphQL-dotnet, schema design, DataLoader, and solving the N+1 problem.", Order = 3 },
+            }
+        };
+
+        var realTimeCommunication = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000018"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Real-Time Communication",
+            Slug = "realtime-communication",
+            Description = "SignalR and WebSockets for bidirectional communication.",
+            Track = RoadmapTrack.Backend,
+            Order = 11,
+            Difficulty = Difficulty.Intermediate,
+            Prerequisites = new List<Guid> { aspnetCoreBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001201"), Title = "SignalR", Type = BlockType.Intro, SeedPrompt = "Explain SignalR Hubs, client connections, groups, automatic reconnection, and transport fallback mechanisms.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001202"), Title = "WebSockets", Type = BlockType.Explanation, SeedPrompt = "Explain raw WebSocket middleware, message framing protocols, and trade-offs vs SignalR.", Order = 2 },
+            }
+        };
+
+        var objectMapping = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000019"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Object Mapping",
+            Slug = "object-mapping",
+            Description = "Converting between domain models and DTOs.",
+            Track = RoadmapTrack.Backend,
+            Order = 12,
+            Difficulty = Difficulty.Beginner,
+            Prerequisites = new List<Guid> { csharpBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001301"), Title = "Manual Mapping", Type = BlockType.Intro, SeedPrompt = "Explain why manual mapping is often best - compile-time safety, no reflection overhead, and clear intent.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001302"), Title = "Mapperly & AutoMapper", Type = BlockType.Explanation, SeedPrompt = "Compare Mapperly compile-time source generation with AutoMapper projection capabilities and common pitfalls.", Order = 2 },
+            }
+        };
+
+        var backgroundTaskScheduling = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000020"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Background Task Scheduling",
+            Slug = "background-tasks",
+            Description = "Background services, schedulers, recurring job processors.",
+            Track = RoadmapTrack.Backend,
+            Order = 13,
+            Difficulty = Difficulty.Intermediate,
+            Prerequisites = new List<Guid> { aspnetCoreBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001401"), Title = "IHostedService & BackgroundService", Type = BlockType.Intro, SeedPrompt = "Explain native hosted services, graceful shutdown handling, and cancellation token propagation.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001402"), Title = "Hangfire & Quartz", Type = BlockType.Explanation, SeedPrompt = "Explain Hangfire dashboards and recurring jobs, Quartz scheduling, job stores, and clustering for enterprise workloads.", Order = 2 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001403"), Title = "Coravel", Type = BlockType.Example, SeedPrompt = "Show Coravel scheduler, event queuing, and task orchestration for simpler ASP.NET Core applications.", Order = 3 },
+            }
+        };
+
+        var testingStrategies = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000021"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Testing Strategies",
+            Slug = "testing",
+            Description = "Unit, integration, snapshot, behavior, E2E, performance, and architecture testing.",
+            Track = RoadmapTrack.Backend,
+            Order = 14,
+            Difficulty = Difficulty.Intermediate,
+            Prerequisites = new List<Guid> { aspnetCoreBasics.Id, csharpBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001501"), Title = "Unit Testing", Type = BlockType.Intro, SeedPrompt = "Explain xUnit/NUnit/MSTest, Moq/NSubstitute, FluentAssertions, Bogus for test data, and AutoFixture.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001502"), Title = "Integration & E2E", Type = BlockType.Explanation, SeedPrompt = "Explain WebApplicationFactory, test containers, Respawn for database resets, Selenium, and Puppeteer-Sharp.", Order = 2 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001503"), Title = "Performance & Architecture", Type = BlockType.Example, SeedPrompt = "Show K6, Crank, Bombardier for load testing, and ArchUnitNET/NetArchTest for architecture enforcement.", Order = 3 },
+            }
+        };
+
+        var microservicesArchitecture = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000022"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Microservices Architecture",
+            Slug = "microservices",
+            Description = "Message brokers, bus, gateways, containers, orchestration.",
+            Track = RoadmapTrack.Backend,
+            Order = 15,
+            Difficulty = Difficulty.Advanced,
+            Prerequisites = new List<Guid> { Guid.Parse("10000000-0000-0000-0000-000000000014"), Guid.Parse("10000000-0000-0000-0000-000000000021"), aspnetCoreBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001601"), Title = "Message Brokers & Bus", Type = BlockType.Intro, SeedPrompt = "Explain RabbitMQ, Kafka, Azure Service Bus, SQS, and NetMQ. Cover MassTransit, NServiceBus, and EasyNetQ abstractions.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001602"), Title = "API Gateway & Containerization", Type = BlockType.Explanation, SeedPrompt = "Explain Ocelot and YARP API gateways, Docker and Podman containerization for .NET microservices.", Order = 2 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001603"), Title = "Orchestration & Actor Models", Type = BlockType.Explanation, SeedPrompt = "Explain Kubernetes, .NET Aspire, Orleans actor framework, Proto.Actor, Dapr, and Akka.NET for distributed systems.", Order = 3 },
+            }
+        };
+
+        var ciCdPipelines = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000023"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "CI/CD",
+            Slug = "ci-cd",
+            Description = "Automated build, test, and deployment pipelines.",
+            Track = RoadmapTrack.Backend,
+            Order = 16,
+            Difficulty = Difficulty.Intermediate,
+            Prerequisites = new List<Guid> { Guid.Parse("10000000-0000-0000-0000-000000000021"), aspnetCoreBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001701"), Title = "CI/CD Pipelines", Type = BlockType.Intro, SeedPrompt = "Explain GitHub Actions for .NET, Azure Pipelines, GitLab CI/CD, and TeamCity for automated build, test, and deploy.", Order = 1 },
+            }
+        };
+
+        var designPatterns = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000024"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Design Patterns",
+            Slug = "design-patterns",
+            Description = "Creational, structural, and behavioral patterns with C# implementations.",
+            Track = RoadmapTrack.Backend,
+            Order = 17,
+            Difficulty = Difficulty.Intermediate,
+            Prerequisites = new List<Guid> { Guid.Parse("10000000-0000-0000-0000-000000000011"), oop.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001801"), Title = "Creational Patterns", Type = BlockType.Explanation, SeedPrompt = "Explain Singleton, Factory, Abstract Factory, Builder, and Prototype patterns. When and why to use each in .NET.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001802"), Title = "Structural & Behavioral Patterns", Type = BlockType.Explanation, SeedPrompt = "Explain Adapter, Decorator, Observer, Strategy, Command, and Chain of Responsibility with .NET framework examples.", Order = 2 },
+            }
+        };
+
+        var monitoringObservability = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000025"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Monitoring & Observability",
+            Slug = "monitoring-logging-tracing",
+            Description = "Metrics, tracing, error tracking, and alerting - on-premises and cloud.",
+            Track = RoadmapTrack.Backend,
+            Order = 18,
+            Difficulty = Difficulty.Intermediate,
+            Prerequisites = new List<Guid> { Guid.Parse("10000000-0000-0000-0000-000000000016"), aspnetCoreBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001901"), Title = "Metrics", Type = BlockType.Intro, SeedPrompt = "Explain Prometheus and Grafana on-premises, Datadog cloud monitoring, .NET metrics export, and custom counters.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001902"), Title = "Logging Aggregation", Type = BlockType.Explanation, SeedPrompt = "Explain ELK Stack (Elasticsearch, Logstash, Kibana), Seq, Sentry.io, and Datadog logs for centralized log management.", Order = 2 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001903"), Title = "Tracing & Alerting", Type = BlockType.Example, SeedPrompt = "Show OpenTelemetry instrumentation, Jaeger, Zipkin for distributed tracing, and Zabbix, Alertmanager, Datadog for alerting.", Order = 3 },
+            }
+        };
+
+        var clientSideDotnet = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000026"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Client-Side .NET",
+            Slug = "client-side-dotnet",
+            Description = "Template engines and client-side .NET frameworks.",
+            Track = RoadmapTrack.Backend,
+            Order = 19,
+            Difficulty = Difficulty.Beginner,
+            Prerequisites = new List<Guid> { aspnetCoreBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001a01"), Title = "Template Engines", Type = BlockType.Intro, SeedPrompt = "Explain Razor engine, Scriban, and Fluid - server-side templating vs API response approaches.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001a02"), Title = "Frameworks", Type = BlockType.Explanation, SeedPrompt = "Explain Blazor WebAssembly and Server rendering models, and .NET MAUI for desktop/mobile cross-platform development.", Order = 2 },
+            }
+        };
+
+        var goodToKnow = new RoadmapTopic
+        {
+            Id = Guid.Parse("10000000-0000-0000-0000-000000000027"),
+            ParentId = aspnetCoreBasics.Id,
+            Title = "Good to Know",
+            Slug = "good-to-know",
+            Description = "Essential libraries and tools.",
+            Track = RoadmapTrack.Backend,
+            Order = 20,
+            Difficulty = Difficulty.Beginner,
+            Prerequisites = new List<Guid> { aspnetCoreBasics.Id },
+            Blocks = new List<TopicBlock>
+            {
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001b01"), Title = "Essential Libraries", Type = BlockType.Intro, SeedPrompt = "Explain Scalar API explorer, MediatR, FluentValidation, Polly for resilience, and BenchmarkDotNet.", Order = 1 },
+                new() { Id = Guid.Parse("20000000-0000-0000-0000-000000001b02"), Title = "Advanced Tools", Type = BlockType.Explanation, SeedPrompt = "Explain DistributedLock for coordination, EF Core Bulk Extensions, Nuke Build automation, and Marten for document DB.", Order = 2 },
+            }
+        };
+
+        aspnetCoreBasics.Children = new List<RoadmapTopic>
+        {
+            generalDevelopmentSkills, advancedCSharp, sqlFundamentals, solidPrinciples, ormFundamentals,
+            advancedDependencyInjection, databases, cachingStrategies, loggingFrameworks, apiClientsComms,
+            realTimeCommunication, objectMapping, backgroundTaskScheduling, testingStrategies, microservicesArchitecture,
+            ciCdPipelines, designPatterns, monitoringObservability, clientSideDotnet, goodToKnow,
         };
 
         // --- Blazor Track ---
@@ -117,7 +474,7 @@ public static class SeedData
             Track = RoadmapTrack.FullStack,
             Order = 1,
             Difficulty = Difficulty.Advanced,
-            Prerequisites = new List<Guid> { efCore.Id, blazorComponents.Id },
+            Prerequisites = new List<Guid> { aspnetCoreBasics.Id },
             Blocks = new List<TopicBlock>
             {
                 new() { Id = Guid.Parse("20000000-0000-0000-0000-000000000601"), Title = "Architecture", Type = BlockType.Intro, SeedPrompt = "Explain clean architecture, shared DTOs, project references, and deployment strategies.", Order = 1 },
@@ -142,7 +499,12 @@ public static class SeedData
 
         var allTopics = new[]
         {
-            csharpBasics, oop, aspnetCoreBasics, efCore, blazorComponents, fullStackProject, seniorPatterns
+            csharpBasics, oop, aspnetCoreBasics,
+            generalDevelopmentSkills, advancedCSharp, sqlFundamentals, solidPrinciples, ormFundamentals,
+            advancedDependencyInjection, databases, cachingStrategies, loggingFrameworks, apiClientsComms,
+            realTimeCommunication, objectMapping, backgroundTaskScheduling, testingStrategies, microservicesArchitecture,
+            ciCdPipelines, designPatterns, monitoringObservability, clientSideDotnet, goodToKnow,
+            blazorComponents, fullStackProject, seniorPatterns,
         };
 
         db.RoadmapTopics.AddRange(allTopics);
