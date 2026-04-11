@@ -121,6 +121,8 @@ public class TopicController : ControllerBase
         {
             content = existingParagraphs[0].Text;
         }
+        // Include ALL paragraphs: System (block content) + AI/User (Q&A thread).
+        var allParagraphs = block.Paragraphs.ToList();
 
         var blockDto = new TopicBlockDto
         {
@@ -129,7 +131,7 @@ public class TopicController : ControllerBase
             Type = block.Type,
             Title = block.Title,
             Content = content,
-            Paragraphs = existingParagraphs.Select(p => ToParagraphDto(p)).ToList(),
+            Paragraphs = allParagraphs.Select(p => ToParagraphDto(p)).ToList(),
             StarterCode = null
         };
 

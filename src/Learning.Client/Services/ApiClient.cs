@@ -37,7 +37,8 @@ public class ApiClient(HttpClient http)
     {
         var response = await http.PostAsJsonAsync("api/ai/ask", request, JsonOptions);
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<ParagraphDto>(JsonOptions))
+        var wrapper = await response.Content.ReadFromJsonAsync<AIAskResponse>(JsonOptions);
+        return wrapper?.Paragraph
             ?? throw new InvalidOperationException("No response from AI ask.");
     }
 
