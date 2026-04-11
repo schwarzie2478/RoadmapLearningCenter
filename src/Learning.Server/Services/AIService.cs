@@ -17,8 +17,6 @@ public class AIService
     private readonly HttpClient _http;
     private readonly string _provider;
     private readonly string _model;
-    private readonly SemaphoreSlim _rateLimiter = new(1, 1);
-    private readonly TimeSpan _minRequestInterval;
 
     public AIService(AppDbContext db, IConfiguration config, ILogger<AIService> logger, IHttpClientFactory httpFactory)
     {
@@ -34,8 +32,6 @@ public class AIService
             _ => config["LLM:OpenRouter:Model"] ?? "qwen/qwen-3.6-plus"
         };
 
-        var intervalMs = config.GetValue("LLM:MinRequestIntervalMs", 2000);
-        _minRequestInterval = TimeSpan.FromMilliseconds(intervalMs);
     }
 
     public async Task<string> GenerateBlockContentAsync(Guid topicId, Guid blockId, CancellationToken ct = default)
@@ -139,7 +135,7 @@ Tone: Educational, clear, and slightly conversational. Assume the reader is lear
         var answer = await CallLLMAsync(messages, ct);
         _logger.LogInformation("Answered question for block {BlockId} via {Provider}/{Model}", request.BlockId, _provider, _model);
 
-        return new ParagraphThread
+        var paragraph = new ParagraphThread
         {
             Id = Guid.NewGuid(),
             BlockId = request.BlockId,
@@ -149,64 +145,63 @@ Tone: Educational, clear, and slightly conversational. Assume the reader is lear
             Depth = parentContext?.Max(p => p.Depth) + 1 ?? 0,
             CreatedAt = DateTime.UtcNow
         };
+
+        _db.ParagraphThreads.Add(paragraph);
+        await _db.SaveChangesAsync(ct);
+
+        return paragraph;
     }
+
 
     private async Task<string> CallLLMAsync(IList<ChatMsg> messages, CancellationToken ct)
     {
-        await _rateLimiter.WaitAsync(ct);
-        try
+        var (baseUrl, reqBody) = _provider switch
         {
-            await Task.Delay(_minRequestInterval, ct);
+            "openai" => BuildOpenAIRequest(messages),
+            _ => BuildOpenRouterRequest(messages)
+        };
 
-            var (baseUrl, reqBody) = _provider switch
-            {
-                "openai" => BuildOpenAIRequest(messages),
-                _ => BuildOpenRouterRequest(messages)
-            };
+        var json = JsonSerializer.Serialize(reqBody);
+        using var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var json = JsonSerializer.Serialize(reqBody);
-            using var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            using var request = new HttpRequestMessage(HttpMethod.Post, baseUrl + "/chat/completions")
-            {
-                Content = content
-            };
-
-            if (_provider == "openrouter")
-            {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", GetOpenRouterKey());
-                request.Headers.Add("HTTP-Referer", "https://localhost");
-                request.Headers.Add("X-Title", "OhMyPi Learning");
-            }
-            else
-            {
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", GetOpenAIKey());
-            }
-
-            using var response = await _http.SendAsync(request, ct);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorBody = await response.Content.ReadAsStringAsync(ct);
-                _logger.LogError("LLM call failed with {StatusCode}: {ErrorBody}", response.StatusCode, errorBody);
-                throw new HttpRequestException($"LLM call failed with {response.StatusCode}: {errorBody}");
-            }
-            var resultJson = await response.Content.ReadAsStringAsync(ct);
-            var result = JsonSerializer.Deserialize<ChatResp>(resultJson, JsonOpts);
-            return result?.Choices?[0]?.Message?.Content?.Trim()
-                ?? throw new InvalidOperationException("Empty response from LLM.");
-        }
-        finally
+        using var request = new HttpRequestMessage(HttpMethod.Post, baseUrl + "/chat/completions")
         {
-            _rateLimiter.Release();
+            Content = content
+        };
+
+        if (_provider == "openrouter")
+        {
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", GetOpenRouterKey());
+            request.Headers.Add("HTTP-Referer", "https://localhost");
+            request.Headers.Add("X-Title", "OhMyPi Learning");
         }
+        else
+        {
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", GetOpenAIKey());
+        }
+        _http.Timeout = TimeSpan.FromSeconds(300);
+        using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(ct);
+            _logger.LogError("LLM call failed with {StatusCode}: {ErrorBody}", response.StatusCode, errorBody);
+            throw new HttpRequestException($"LLM call failed with {response.StatusCode}: {errorBody}");
+        }
+        using var stream = await response.Content.ReadAsStreamAsync();
+        using var reader = new StreamReader(stream);
+        // read line-by-line for SSE, or read to end if you just want the full result
+        var resultJson = await reader.ReadToEndAsync();
+        //var resultJson = await response.Content.ReadAsStringAsync(ct);
+        var result = JsonSerializer.Deserialize<ChatResp>(resultJson, JsonOpts);
+        return result?.Choices?[0]?.Message?.Content?.Trim()
+            ?? throw new InvalidOperationException("Empty response from LLM.");
     }
 
     private static readonly JsonSerializerOptions JsonOpts = new() { PropertyNameCaseInsensitive = true };
 
     private (string Url, object Body) BuildOpenAIRequest(IList<ChatMsg> messages)
     {
-        _http.BaseAddress = new Uri("https://api.openai.com/v1");
         return ("https://api.openai.com/v1", new
         {
             model = _model,
@@ -215,10 +210,8 @@ Tone: Educational, clear, and slightly conversational. Assume the reader is lear
             temperature = 0.7d
         });
     }
-
     private (string Url, object Body) BuildOpenRouterRequest(IList<ChatMsg> messages)
     {
-        _http.BaseAddress = null;
         var model = GetConfigValue("LLM:OpenRouter:Model") ?? "qwen/qwen-3.6-plus";
         var maxTokens = GetConfigValueAsInt("LLM:OpenRouter:MaxTokens", 1500);
         var temperature = GetConfigValueAsFloat("LLM:OpenRouter:Temperature", 0.7f);

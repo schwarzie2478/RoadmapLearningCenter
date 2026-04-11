@@ -15,7 +15,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Application services
 builder.Services.AddScoped<AIService>();
-builder.Services.AddHttpClient("AI");
+builder.Services.AddHttpClient("AI")
+    .RemoveAllResilienceHandlers()
+    .ConfigureHttpClient(c => {
+        c.Timeout = TimeSpan.FromMinutes(3);
+        }).SetHandlerLifetime(TimeSpan.FromMinutes(10));
 builder.Services.AddScoped<CodeExecutionService>();
 builder.Services.AddScoped<ProgressService>();
 
